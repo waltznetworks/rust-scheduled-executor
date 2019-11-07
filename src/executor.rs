@@ -43,8 +43,8 @@ impl TaskHandle {
     }
 }
 
-fn fixed_interval_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, task_handle: TaskHandle)
-    where F: Fn(&Handle) + Send + 'static
+fn fixed_interval_loop<F>(mut scheduled_fn: F, interval: Duration, handle: &Handle, task_handle: TaskHandle)
+    where F: FnMut(&Handle) + Send + 'static
 {
     if task_handle.stopped() {
         return;
@@ -81,8 +81,8 @@ fn calculate_delay(interval: Duration, execution: Duration, delay: Duration) -> 
     }
 }
 
-fn fixed_rate_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, delay: Duration, task_handle: TaskHandle)
-    where F: Fn(&Handle) + Send + 'static
+fn fixed_rate_loop<F>(mut scheduled_fn: F, interval: Duration, handle: &Handle, delay: Duration, task_handle: TaskHandle)
+    where F: FnMut(&Handle) + Send + 'static
 {
     if task_handle.stopped() {
         return;
@@ -167,7 +167,7 @@ impl CoreExecutor {
     /// function every `interval`, but if one execution takes longer than `interval` it will delay
     /// all the subsequent calls.
     pub fn schedule_fixed_interval<F>(&self, initial: Duration, interval: Duration, scheduled_fn: F) -> TaskHandle
-        where F: Fn(&Handle) + Send + 'static
+        where F: FnMut(&Handle) + Send + 'static
     {
         let task_handle = TaskHandle::new();
         let task_handle_clone = task_handle.clone();
@@ -188,7 +188,7 @@ impl CoreExecutor {
     /// every `interval`, and if a task execution takes longer than `interval`, the wait time
     /// between task will be reduced to decrease the overall delay.
     pub fn schedule_fixed_rate<F>(&self, initial: Duration, interval: Duration, scheduled_fn: F) -> TaskHandle
-        where F: Fn(&Handle) + Send + 'static
+        where F: FnMut(&Handle) + Send + 'static
     {
         let task_handle = TaskHandle::new();
         let task_handle_clone = task_handle.clone();
